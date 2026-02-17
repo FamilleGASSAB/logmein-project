@@ -9,6 +9,22 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: logs_db
+          POSTGRES_USER: logs_user
+          POSTGRES_PASSWORD: logs_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U logs_user -d logs_db"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
     defaults:
       run:
         working-directory: backend
@@ -27,13 +43,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements.dev.txt
-
-      - name: Security scan (Bandit)
-        run: |
-          pip install bandit
-          bandit -r . -ll
+          pip install bandit psycopg2-binary
 
       - name: Run tests
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_NAME: logs_db
+          DB_USER: logs_user
+          DB_PASSWORD: logs_password
         run: |
           chmod +x run_tests.sh
           ./run_tests.sh
+
+      - name: Run security scan
+        run: bandit -r .
