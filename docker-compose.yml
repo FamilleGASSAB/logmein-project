@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres
+    container_name: logmein-db
+    environment:
+      POSTGRES_PASSWORD: StrongPassword123
+    networks:
+      - logmein-net
+
+  backend:
+    build: ./backend
+    container_name: logmein-backend
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: StrongPassword123
+    ports:
+      - "127.0.0.1:5000:5000"
+    depends_on:
+      - db
+    networks:
+      - logmein-net
+
+  frontend:
+    build: ./frontend
+    container_name: logmein-frontend
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - backend
+    networks:
+      - logmein-net
+
+networks:
+  logmein-net:
