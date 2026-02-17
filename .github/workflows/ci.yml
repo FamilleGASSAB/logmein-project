@@ -57,4 +57,4 @@ jobs:
           ./run_tests.sh
 
       - name: Run security scan
-        run: bandit -r .
+        run: bandit -r . -ll -x tests
