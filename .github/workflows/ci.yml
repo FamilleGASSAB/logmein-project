@@ -7,8 +7,8 @@ on:
     branches: ["main"]
 
 env:
-  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/logmein-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/logmein-frontend
+  IMAGE_BACKEND: ghcr.io/famillegassab/logmein-backend
+  IMAGE_FRONTEND: ghcr.io/famillegassab/logmein-frontend
 
 jobs:
 
