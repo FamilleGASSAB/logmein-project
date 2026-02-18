@@ -1,34 +1,54 @@
 services:
+
   db:
-    image: postgres
+    image: postgres:15
     container_name: logmein-db
+    restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: StrongPassword123
+      POSTGRES_DB: logs_db
+      POSTGRES_USER: logs_user
+      POSTGRES_PASSWORD: logs_password
     networks:
-      - logmein-net
+      - logmein-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logs_user -d logs_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: logmein-backend
+    restart: unless-stopped
     environment:
       DB_HOST: db
-      DB_PASSWORD: StrongPassword123
+      DB_NAME: logs_db
+      DB_USER: logs_user
+      DB_PASSWORD: logs_password
+      DB_PORT: 5432
     ports:
       - "127.0.0.1:5000:5000"
-    depends_on:
-      - db
     networks:
-      - logmein-net
+      - logmein-internal
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: logmein-frontend
+    restart: unless-stopped
     ports:
       - "127.0.0.1:8080:80"
+    networks:
+      - logmein-internal
     depends_on:
       - backend
-    networks:
-      - logmein-net
 
 networks:
-  logmein-net:
+  logmein-internal:
+    driver: bridge
